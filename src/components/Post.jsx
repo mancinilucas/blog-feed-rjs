@@ -1,31 +1,47 @@
+import { format, formatDistanceToNow } from 'date-fns'
+import ptBR from 'date-fns/locale/pt-BR'
+
+import { Avatar } from './Avatar'
 import { Comment } from './Comment'
 
 import styles from './Post.module.css'
 
-export function Post(){
+export function Post({ author, publishedAt, content }){
+  const publishedDateFormatted = format(publishedAt, "d 'de' LLLL 'às' HH:mm'h'",{
+    locale: ptBR
+  })
+
+  const publishedDateRelativeToNow = formatDistanceToNow(publishedAt, {
+    locale: ptBR,
+    addSuffix: true
+  })
+  
+  const publishedContent = content.map(line=>{
+    if(line.type === 'paragraph'){
+      return <p>{line.content}</p>
+    } else if(line.type === 'link'){
+      return <p><a href="#">{line.content}</a> </p>
+    }
+  })
+
   return(
     <article className={styles.post}>
       <header>
         <div className={styles.author}>
-          <img className={styles.avatar} src="https://images.unsplash.com/photo-1533738363-b7f9aef128ce?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=400&q=50" alt="" />
+          <Avatar src={author.avatarUrl} />
           <div className={styles.authorInfo}>
-            <strong>Sr Oliver</strong>
-            <span>Web Dev</span>
+            <strong>{author.name}</strong>
+            <span>{author.role}</span>
           </div>
         </div>
 
-        <time title="15 de Junho às 19:00" dataTime="2022-06-15 19:00">Publicado há 1h</time>
+        <time title={publishedDateFormatted} dataTime={publishedAt.toISOString()}>
+          {publishedDateRelativeToNow}
+        </time>
       </header>
 
       <div className={styles.content}>
-        <p>Fala galera 👋</p>
-        <p>Mais um projeto React saindo</p>
-        <p><a href=""> 👉 github.com/oliverthecat</a></p>
-        <p className={styles.hash}>
-          <a href="">#novoprojeto</a> 
-          <a href="">#reactjs</a>
-          <a href="">#front-end</a>
-        </p>
+        {publishedContent}
       </div>
 
       <form className={styles.commentForm}>
